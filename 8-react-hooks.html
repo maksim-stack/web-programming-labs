@@ -1,0 +1,620 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>React: хуки</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"><style>* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #editor-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #editor-container.hidden {
+            display: none;
+        }
+
+        #editor-header {
+            background: #2d3748;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #editor-header h2 {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        #editor-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #4a5568;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2d3748;
+        }
+
+        #markdown-input {
+            flex: 1;
+            padding: 2rem;
+            background: #1a202c;
+            color: #e2e8f0;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        #markdown-input:focus {
+            outline: none;
+        }
+
+        .slide-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 3rem;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .slide h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .slide h2 {
+            color: #764ba2;
+            font-size: 2rem;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .slide h3 {
+            color: #4a5568;
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .slide p {
+            color: #2d3748;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .slide ul, .slide ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide li {
+            color: #2d3748;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide pre {
+            background: #282c34;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .slide pre code {
+            background: transparent;
+            color: #abb2bf;
+        }
+
+        .slide code {
+            font-family: 'Courier New', Consolas, Monaco, monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .slide h1 code, .slide h2 code, .slide h3 code {
+            font-size: 0.85em;
+            background: rgba(237, 242, 247, 0.5);
+            padding: 0.1em 0.3em;
+            border-radius: 3px;
+        }
+
+        .slide p code {
+            background: #edf2f7;
+            color: #e53e3e;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .slide blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #4a5568;
+        }
+
+        .slide img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .slide th, .slide td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .slide th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .slide tr:nth-child(even) {
+            background: #f7fafc;
+        }
+
+        .note {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .note strong {
+            color: #c53030;
+        }
+
+        .warning {
+            background: #fffaf0;
+            border-left: 4px solid #f6ad55;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .warning strong {
+            color: #c05621;
+        }
+
+        .info {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .info strong {
+            color: #2c5282;
+        }
+
+        .success {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .success strong {
+            color: #22543d;
+        }
+
+        .danger {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .danger strong {
+            color: #742a2a;
+        }
+
+        .tip {
+            background: #fefcbf;
+            border-left: 4px solid #ecc94b;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .tip strong {
+            color: #744210;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            transition: width 0.3s;
+        }
+
+        .slide-number {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #sidebar {
+            position: fixed;
+            right: -320px;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 200;
+            padding: 1rem;
+        }
+
+        #sidebar.open {
+            right: 0;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        #sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        #sidebar-header h3 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        #sidebar-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4a5568;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        #sidebar-close:hover {
+            color: #667eea;
+        }
+
+        .slide-thumbnail {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .slide-thumbnail:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+            transform: translateX(-4px);
+        }
+
+        .slide-thumbnail.active {
+            border-color: #667eea;
+            background: #f7faff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .slide-thumbnail-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-thumbnail-content {
+            font-size: 0.85rem;
+            color: #2d3748;
+            line-height: 1.4;
+            max-height: 4.2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide-thumbnail-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 1.4rem;
+            background: linear-gradient(to right, transparent, white);
+        }
+
+        .slide-thumbnail.active .slide-thumbnail-content::after {
+            background: linear-gradient(to right, transparent, #f7faff);
+        }
+
+        .slide-thumbnail-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        #sidebar-toggle {
+            position: fixed;
+            right: 1rem;
+            top: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 150;
+        }
+
+        #sidebar-toggle:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        .mermaid {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            overflow: visible; /* щоб не обрізати тіні / розширені ноди */
+        }
+
+        /* Запобігаємо обрізанню останньої літери в нодах Mermaid через зміну font-weight після розрахунку розміру */
+        .mermaid svg { overflow: visible !important; }
+        /* перестраховка проти обрізання foreignObject (на випадок інших діаграм) */
+        .mermaid svg foreignObject { overflow: visible !important; }
+
+        .plantuml-diagram {
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem auto;
+            display: block;
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #help-overlay {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            transition: opacity 0.3s;
+        }
+
+        #help-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #help-overlay kbd {
+            background: #2d3748;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        .mermaid-error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            padding: 1rem;
+            border-radius: 6px;
+            color: #742a2a;
+            margin: 1.5rem 0;
+        }
+
+        .mermaid-error pre {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+        }
+
+        /* Повноекранний режим - зберігаємо оригінальний фон */
+        #presentation-container:fullscreen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #presentation-container:-webkit-full-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #presentation-container:-moz-full-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        #presentation-container:-ms-fullscreen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+#presentation-container:fullscreen,#presentation-container:-webkit-full-screen,#presentation-container:-moz-full-screen,#presentation-container:-ms-fullscreen{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)!important;}</style></head><body><div id="presentation-container"><div class="progress"><div class="progress-bar" id="progress-bar"></div></div><button id="sidebar-toggle" onclick="toggleSidebar()" title="Навігація слайдами (S)">☰</button><div id="sidebar"><div id="sidebar-header"><h3>📑 Слайди</h3><button id="sidebar-close" onclick="toggleSidebar()">✕</button></div><div id="sidebar-content"></div></div><div class="slide-container"><div class="slide" id="current-slide"></div></div><div class="controls"><button class="control-btn" onclick="previousSlide()" title="Попередній (←)">←</button><button class="control-btn" onclick="nextSlide()" title="Наступний (→)">→</button><button class="control-btn" onclick="toggleFullscreen()" title="Повноекранний режим (F)">⛶</button><button class="control-btn" onclick="toggleHelp()" title="Допомога (?)">?</button></div><div class="slide-number" id="slide-number">1 / 20</div><div id="help-overlay" class="hidden"><strong>Гарячі клавіші:</strong><br><kbd>←</kbd> <kbd>→</kbd> Навігація<br><kbd>F</kbd> Повноекранний режим<br><kbd>S</kbd> Sidebar<br><kbd>?</kbd> Допомога<br><kbd>Esc</kbd> Закрити</div></div><script>const slides=["<h1>React: хуки</h1>\n<p><strong>Сучасні технології Internet-програмування</strong></p>\n<p>Лектор: Кобилянський Антон</p>\n","<h1>📋 План лекції</h1>\n<ol>\n<li>🪝 Концепція хуків та правила використання</li>\n<li>🔄 Lifecycle компонентів у React</li>\n<li>📦 useState — управління локальним станом</li>\n<li>⚡ useEffect — синхронізація з зовнішнім світом</li>\n<li>🔍 Порівняння залежностей у useEffect</li>\n<li>🔗 useRef — доступ до DOM та мутабельні значення</li>\n<li>🧩 Custom hooks — перевикористання логіки</li>\n<li>⚠️ Stale closure trap</li>\n<li>✅ Ключові висновки та контрольні питання</li>\n</ol>\n","<h1>🪝 Що таке хуки?</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>Хук (Hook)</strong> — спеціальна функція React, ім'я якої починається з <code>use</code>. Хуки дозволяють функціональним компонентам мати стан, виконувати побічні ефекти та підключатися до lifecycle React.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> До React 16.8 (2019) стан та lifecycle були доступні лише у class-компонентах. Хуки усунули цю несиметрію — тепер уся логіка доступна у функціональних компонентах.</p>\n<h2>📜 Правила хуків (Rules of Hooks)</h2>\n<pre><code class=\"language-plaintext hljs\" data-highlighted=\"yes\">⚠️ Ці правила НЕ є рекомендаціями — їх порушення призводить до\n   неочікуваних багів та помилок рантайму.</code></pre><p><strong>Правило 1:</strong> Викликайте хуки лише на <strong>верхньому рівні</strong> функції компонента.</p>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// ❌ ЗАБОРОНЕНО — хук всередині умови</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskList</span>(<span class=\"hljs-params\">{ isAdmin }: { isAdmin: <span class=\"hljs-built_in\">boolean</span> }</span>) {\n  <span class=\"hljs-keyword\">if</span> (isAdmin) {\n    <span class=\"hljs-keyword\">const</span> [tasks, setTasks] = useState&lt;<span class=\"hljs-title class_\">Task</span>[]&gt;([]); <span class=\"hljs-comment\">// Порушення!</span>\n  }\n}\n\n<span class=\"hljs-comment\">// ✅ ПРАВИЛЬНО — хук завжди на верхньому рівні</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskList</span>(<span class=\"hljs-params\">{ isAdmin }: { isAdmin: <span class=\"hljs-built_in\">boolean</span> }</span>) {\n  <span class=\"hljs-keyword\">const</span> [tasks, setTasks] = useState&lt;<span class=\"hljs-title class_\">Task</span>[]&gt;([]);\n  <span class=\"hljs-comment\">// Умова — всередині, не навколо хука</span>\n  <span class=\"hljs-keyword\">if</span> (!isAdmin) <span class=\"hljs-keyword\">return</span> <span class=\"hljs-literal\">null</span>;\n}</code></pre><p><strong>Правило 2:</strong> Викликайте хуки лише у <strong>React-функціях</strong> (компоненти або інші хуки).</p>\n<div class=\"warning\"><strong>⚠️ Чому ці правила існують?</strong> <p>React відстежує хуки за їх <strong>порядком виклику</strong> між рендерами. Якщо порядок зміниться (через умови або цикли), React не зможе зіставити стан між рендерами і виникне помилка.</p>\n</div>\n\n","<h1>🔄 Lifecycle компонента: концепція</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>Lifecycle</strong> (життєвий цикл) — послідовність фаз, через які проходить компонент від появи на екрані до зникнення.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> Розуміння lifecycle необхідне для правильного розміщення побічних ефектів (запити до API, підписки, таймери).</p>\n<h2>📊 Три фази lifecycle</h2>\n\n<div class=\"mermaid\" data-source=\"graph LR\n    M[&quot;🟢 Mount\nМонтування&quot;] --&gt; U1[&quot;🔵 Update\nОновлення&quot;]\n    U1 --&gt; U2[&quot;🔵 Update\nОновлення&quot;]\n    U2 --&gt; U3[&quot;🔵 ...&quot;]\n    U3 --&gt; UN[&quot;🔴 Unmount\nДемонтування&quot;]\n    style M fill:#e8f5e9,stroke:#388e3c\n    style U1 fill:#e3f2fd,stroke:#1565c0\n    style U2 fill:#e3f2fd,stroke:#1565c0\n    style U3 fill:#e3f2fd,stroke:#1565c0\n    style UN fill:#fce4ec,stroke:#c2185b\"><svg id=\"exp-1772053431738-3-0\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" style=\"max-width: 860.3203125px;\" viewBox=\"0 0 860.3203125 88\" role=\"graphics-document document\" aria-roledescription=\"flowchart-v2\"><style>#exp-1772053431738-3-0{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#exp-1772053431738-3-0 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#exp-1772053431738-3-0 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#exp-1772053431738-3-0 .error-icon{fill:#552222;}#exp-1772053431738-3-0 .error-text{fill:#552222;stroke:#552222;}#exp-1772053431738-3-0 .edge-thickness-normal{stroke-width:1px;}#exp-1772053431738-3-0 .edge-thickness-thick{stroke-width:3.5px;}#exp-1772053431738-3-0 .edge-pattern-solid{stroke-dasharray:0;}#exp-1772053431738-3-0 .edge-thickness-invisible{stroke-width:0;fill:none;}#exp-1772053431738-3-0 .edge-pattern-dashed{stroke-dasharray:3;}#exp-1772053431738-3-0 .edge-pattern-dotted{stroke-dasharray:2;}#exp-1772053431738-3-0 .marker{fill:#333333;stroke:#333333;}#exp-1772053431738-3-0 .marker.cross{stroke:#333333;}#exp-1772053431738-3-0 svg{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:16px;}#exp-1772053431738-3-0 p{margin:0;}#exp-1772053431738-3-0 .label{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:#333;}#exp-1772053431738-3-0 .cluster-label text{fill:#333;}#exp-1772053431738-3-0 .cluster-label span{color:#333;}#exp-1772053431738-3-0 .cluster-label span p{background-color:transparent;}#exp-1772053431738-3-0 .label text,#exp-1772053431738-3-0 span{fill:#333;color:#333;}#exp-1772053431738-3-0 .node rect,#exp-1772053431738-3-0 .node circle,#exp-1772053431738-3-0 .node ellipse,#exp-1772053431738-3-0 .node polygon,#exp-1772053431738-3-0 .node path{fill:#ECECFF;stroke:#667eea;stroke-width:1px;}#exp-1772053431738-3-0 .rough-node .label text,#exp-1772053431738-3-0 .node .label text,#exp-1772053431738-3-0 .image-shape .label,#exp-1772053431738-3-0 .icon-shape .label{text-anchor:middle;}#exp-1772053431738-3-0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#exp-1772053431738-3-0 .rough-node .label,#exp-1772053431738-3-0 .node .label,#exp-1772053431738-3-0 .image-shape .label,#exp-1772053431738-3-0 .icon-shape .label{text-align:center;}#exp-1772053431738-3-0 .node.clickable{cursor:pointer;}#exp-1772053431738-3-0 .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#exp-1772053431738-3-0 .arrowheadPath{fill:#333333;}#exp-1772053431738-3-0 .edgePath .path{stroke:#333333;stroke-width:2.0px;}#exp-1772053431738-3-0 .flowchart-link{stroke:#333333;fill:none;}#exp-1772053431738-3-0 .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#exp-1772053431738-3-0 .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#exp-1772053431738-3-0 .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#exp-1772053431738-3-0 .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#exp-1772053431738-3-0 .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#exp-1772053431738-3-0 .cluster text{fill:#333;}#exp-1772053431738-3-0 .cluster span{color:#333;}#exp-1772053431738-3-0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#exp-1772053431738-3-0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#exp-1772053431738-3-0 rect.text{fill:none;stroke-width:0;}#exp-1772053431738-3-0 .icon-shape,#exp-1772053431738-3-0 .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#exp-1772053431738-3-0 .icon-shape p,#exp-1772053431738-3-0 .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#exp-1772053431738-3-0 .icon-shape rect,#exp-1772053431738-3-0 .image-shape rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#exp-1772053431738-3-0 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#exp-1772053431738-3-0 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#exp-1772053431738-3-0 :root{--mermaid-font-family:\"trebuchet ms\",verdana,arial,sans-serif;}</style><g><marker id=\"exp-1772053431738-3-0_flowchart-v2-pointEnd\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M 0 0 L 10 5 L 0 10 z\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431738-3-0_flowchart-v2-pointStart\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"4.5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M 0 5 L 10 10 L 10 0 z\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431738-3-0_flowchart-v2-circleEnd\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"11\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><circle cx=\"5\" cy=\"5\" r=\"5\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></circle></marker><marker id=\"exp-1772053431738-3-0_flowchart-v2-circleStart\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"-1\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><circle cx=\"5\" cy=\"5\" r=\"5\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></circle></marker><marker id=\"exp-1772053431738-3-0_flowchart-v2-crossEnd\" class=\"marker cross flowchart-v2\" viewBox=\"0 0 11 11\" refX=\"12\" refY=\"5.2\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><path d=\"M 1,1 l 9,9 M 10,1 l -9,9\" class=\"arrowMarkerPath\" style=\"stroke-width: 2; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431738-3-0_flowchart-v2-crossStart\" class=\"marker cross flowchart-v2\" viewBox=\"0 0 11 11\" refX=\"-1\" refY=\"5.2\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><path d=\"M 1,1 l 9,9 M 10,1 l -9,9\" class=\"arrowMarkerPath\" style=\"stroke-width: 2; stroke-dasharray: 1, 0;\"></path></marker><g class=\"root\"><g class=\"clusters\"></g><g class=\"edgePaths\"><path d=\"M148.469,44L152.635,44C156.802,44,165.135,44,172.802,44C180.469,44,187.469,44,190.969,44L194.469,44\" id=\"L_M_U1_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_M_U1_0\" data-points=\"W3sieCI6MTQ4LjQ2ODc1LCJ5Ijo0NH0seyJ4IjoxNzMuNDY4NzUsInkiOjQ0fSx7IngiOjE5OC40Njg3NSwieSI6NDR9XQ==\" marker-end=\"url(#exp-1772053431738-3-0_flowchart-v2-pointEnd)\"></path><path d=\"M330.188,44L334.354,44C338.521,44,346.854,44,354.521,44C362.188,44,369.188,44,372.688,44L376.188,44\" id=\"L_U1_U2_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_U1_U2_0\" data-points=\"W3sieCI6MzMwLjE4NzUsInkiOjQ0fSx7IngiOjM1NS4xODc1LCJ5Ijo0NH0seyJ4IjozODAuMTg3NSwieSI6NDR9XQ==\" marker-end=\"url(#exp-1772053431738-3-0_flowchart-v2-pointEnd)\"></path><path d=\"M511.906,44L516.073,44C520.24,44,528.573,44,536.24,44C543.906,44,550.906,44,554.406,44L557.906,44\" id=\"L_U2_U3_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_U2_U3_0\" data-points=\"W3sieCI6NTExLjkwNjI1LCJ5Ijo0NH0seyJ4Ijo1MzYuOTA2MjUsInkiOjQ0fSx7IngiOjU2MS45MDYyNSwieSI6NDR9XQ==\" marker-end=\"url(#exp-1772053431738-3-0_flowchart-v2-pointEnd)\"></path><path d=\"M643.406,44L647.573,44C651.74,44,660.073,44,667.74,44C675.406,44,682.406,44,685.906,44L689.406,44\" id=\"L_U3_UN_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_U3_UN_0\" data-points=\"W3sieCI6NjQzLjQwNjI1LCJ5Ijo0NH0seyJ4Ijo2NjguNDA2MjUsInkiOjQ0fSx7IngiOjY5My40MDYyNSwieSI6NDR9XQ==\" marker-end=\"url(#exp-1772053431738-3-0_flowchart-v2-pointEnd)\"></path></g><g class=\"edgeLabels\"><g><rect class=\"background\" style=\"stroke: none\"></rect></g><g><rect class=\"background\" style=\"stroke: none\"></rect></g><g><rect class=\"background\" style=\"stroke: none\"></rect></g><g><rect class=\"background\" style=\"stroke: none\"></rect></g><g class=\"edgeLabel\"><g class=\"label\" data-id=\"L_M_U1_0\" transform=\"translate(0, 0)\"><text y=\"-10.1\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"></tspan></text></g></g><g class=\"edgeLabel\"><g class=\"label\" data-id=\"L_U1_U2_0\" transform=\"translate(0, 0)\"><text y=\"-10.1\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"></tspan></text></g></g><g class=\"edgeLabel\"><g class=\"label\" data-id=\"L_U2_U3_0\" transform=\"translate(0, 0)\"><text y=\"-10.1\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"></tspan></text></g></g><g class=\"edgeLabel\"><g class=\"label\" data-id=\"L_U3_UN_0\" transform=\"translate(0, 0)\"><text y=\"-10.1\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"></tspan></text></g></g></g><g class=\"nodes\"><g class=\"node default  \" id=\"flowchart-M-0\" transform=\"translate(78.234375, 44)\"><rect class=\"basic label-container\" style=\"fill:#e8f5e9 !important;stroke:#388e3c !important\" x=\"-70.234375\" y=\"-36\" width=\"140.46875\" height=\"72\"></rect><g class=\"label\" style=\"\" transform=\"translate(-46.234375, -24)\"><rect></rect><foreignObject width=\"92.46875\" height=\"48\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>🟢 Mount<br>Монтування</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-U1-1\" transform=\"translate(264.328125, 44)\"><rect class=\"basic label-container\" style=\"fill:#e3f2fd !important;stroke:#1565c0 !important\" x=\"-65.859375\" y=\"-36\" width=\"131.71875\" height=\"72\"></rect><g class=\"label\" style=\"\" transform=\"translate(-41.859375, -24)\"><rect></rect><foreignObject width=\"83.71875\" height=\"48\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>🔵 Update<br>Оновлення</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-U2-3\" transform=\"translate(446.046875, 44)\"><rect class=\"basic label-container\" style=\"fill:#e3f2fd !important;stroke:#1565c0 !important\" x=\"-65.859375\" y=\"-36\" width=\"131.71875\" height=\"72\"></rect><g class=\"label\" style=\"\" transform=\"translate(-41.859375, -24)\"><rect></rect><foreignObject width=\"83.71875\" height=\"48\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>🔵 Update<br>Оновлення</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-U3-5\" transform=\"translate(602.65625, 44)\"><rect class=\"basic label-container\" style=\"fill:#e3f2fd !important;stroke:#1565c0 !important\" x=\"-40.75\" y=\"-24\" width=\"81.5\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-16.75, -12)\"><rect></rect><foreignObject width=\"33.5\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>🔵 ...</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-UN-7\" transform=\"translate(772.86328125, 44)\"><rect class=\"basic label-container\" style=\"fill:#fce4ec !important;stroke:#c2185b !important\" x=\"-79.45703125\" y=\"-36\" width=\"158.9140625\" height=\"72\"></rect><g class=\"label\" style=\"\" transform=\"translate(-55.45703125, -24)\"><rect></rect><foreignObject width=\"110.9140625\" height=\"48\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>🔴 Unmount<br>Демонтування</p></span></div></foreignObject></g></g></g></g></g></svg></div>\n<table>\n<thead>\n<tr>\n<th>Фаза</th>\n<th>Коли відбувається</th>\n<th>Що робить React</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>Mount</strong></td>\n<td>Компонент вперше з'являється в DOM</td>\n<td>Створює DOM-елементи, запускає effects</td>\n</tr>\n<tr>\n<td><strong>Update</strong></td>\n<td>Змінився state або props</td>\n<td>Порівнює Virtual DOM (reconciliation), перерендерює</td>\n</tr>\n<tr>\n<td><strong>Unmount</strong></td>\n<td>Компонент видаляється з DOM</td>\n<td>Запускає cleanup-функції, звільняє ресурси</td>\n</tr>\n</tbody></table>\n<h2>🔁 Деталі фази Update</h2>\n<p>Оновлення відбувається при:</p>\n<ul>\n<li>виклику <code>setState</code> (зміна власного стану)</li>\n<li>отримання нових props від батьківського компонента</li>\n<li>оновленні контексту, на який підписаний компонент</li>\n</ul>\n<div class=\"note\"><strong>📝 Важливо</strong> <p>Сам по собі рендер — це лише виклик функції компонента і створення нового JSX-дерева. DOM оновлюється лише після того, як React порівняє старе і нове дерево (reconciliation).</p>\n</div>\n\n","<h1>🔄 Lifecycle та хуки: відповідність</h1>\n<p><strong>Головна ідея:</strong> <code>useEffect</code> — основний спосіб підключитися до lifecycle компонента у функціональних компонентах.</p>\n<h2>🗺️ Відповідність class-методів та хуків</h2>\n\n<div class=\"mermaid\" data-source=\"graph TD\n    subgraph CLASS[&quot;🏛️ Class Component&quot;]\n        CM[&quot;componentDidMount&quot;]\n        CU[&quot;componentDidUpdate&quot;]\n        CWU[&quot;componentWillUnmount&quot;]\n    end\n    subgraph HOOKS[&quot;🪝 Function Component&quot;]\n        UE1[&quot;useEffect(fn, [])&quot;]\n        UE2[&quot;useEffect(fn, [dep])&quot;]\n        UE3[&quot;useEffect(fn, []) + return cleanup&quot;]\n    end\n    CM --&gt;|&quot;відповідає&quot;| UE1\n    CU --&gt;|&quot;відповідає&quot;| UE2\n    CWU --&gt;|&quot;відповідає&quot;| UE3\n    style CLASS fill:#fff3e0,stroke:#ef6c00\n    style HOOKS fill:#e3f2fd,stroke:#1565c0\"><svg id=\"exp-1772053431753-4-0\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" style=\"max-width: 834.59765625px;\" viewBox=\"0 0 834.59765625 309\" role=\"graphics-document document\" aria-roledescription=\"flowchart-v2\"><style>#exp-1772053431753-4-0{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#exp-1772053431753-4-0 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#exp-1772053431753-4-0 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#exp-1772053431753-4-0 .error-icon{fill:#552222;}#exp-1772053431753-4-0 .error-text{fill:#552222;stroke:#552222;}#exp-1772053431753-4-0 .edge-thickness-normal{stroke-width:1px;}#exp-1772053431753-4-0 .edge-thickness-thick{stroke-width:3.5px;}#exp-1772053431753-4-0 .edge-pattern-solid{stroke-dasharray:0;}#exp-1772053431753-4-0 .edge-thickness-invisible{stroke-width:0;fill:none;}#exp-1772053431753-4-0 .edge-pattern-dashed{stroke-dasharray:3;}#exp-1772053431753-4-0 .edge-pattern-dotted{stroke-dasharray:2;}#exp-1772053431753-4-0 .marker{fill:#333333;stroke:#333333;}#exp-1772053431753-4-0 .marker.cross{stroke:#333333;}#exp-1772053431753-4-0 svg{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:16px;}#exp-1772053431753-4-0 p{margin:0;}#exp-1772053431753-4-0 .label{font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;color:#333;}#exp-1772053431753-4-0 .cluster-label text{fill:#333;}#exp-1772053431753-4-0 .cluster-label span{color:#333;}#exp-1772053431753-4-0 .cluster-label span p{background-color:transparent;}#exp-1772053431753-4-0 .label text,#exp-1772053431753-4-0 span{fill:#333;color:#333;}#exp-1772053431753-4-0 .node rect,#exp-1772053431753-4-0 .node circle,#exp-1772053431753-4-0 .node ellipse,#exp-1772053431753-4-0 .node polygon,#exp-1772053431753-4-0 .node path{fill:#ECECFF;stroke:#667eea;stroke-width:1px;}#exp-1772053431753-4-0 .rough-node .label text,#exp-1772053431753-4-0 .node .label text,#exp-1772053431753-4-0 .image-shape .label,#exp-1772053431753-4-0 .icon-shape .label{text-anchor:middle;}#exp-1772053431753-4-0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#exp-1772053431753-4-0 .rough-node .label,#exp-1772053431753-4-0 .node .label,#exp-1772053431753-4-0 .image-shape .label,#exp-1772053431753-4-0 .icon-shape .label{text-align:center;}#exp-1772053431753-4-0 .node.clickable{cursor:pointer;}#exp-1772053431753-4-0 .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#exp-1772053431753-4-0 .arrowheadPath{fill:#333333;}#exp-1772053431753-4-0 .edgePath .path{stroke:#333333;stroke-width:2.0px;}#exp-1772053431753-4-0 .flowchart-link{stroke:#333333;fill:none;}#exp-1772053431753-4-0 .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#exp-1772053431753-4-0 .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#exp-1772053431753-4-0 .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#exp-1772053431753-4-0 .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#exp-1772053431753-4-0 .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#exp-1772053431753-4-0 .cluster text{fill:#333;}#exp-1772053431753-4-0 .cluster span{color:#333;}#exp-1772053431753-4-0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:system-ui,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#exp-1772053431753-4-0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#exp-1772053431753-4-0 rect.text{fill:none;stroke-width:0;}#exp-1772053431753-4-0 .icon-shape,#exp-1772053431753-4-0 .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#exp-1772053431753-4-0 .icon-shape p,#exp-1772053431753-4-0 .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#exp-1772053431753-4-0 .icon-shape rect,#exp-1772053431753-4-0 .image-shape rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#exp-1772053431753-4-0 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#exp-1772053431753-4-0 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#exp-1772053431753-4-0 :root{--mermaid-font-family:\"trebuchet ms\",verdana,arial,sans-serif;}</style><g><marker id=\"exp-1772053431753-4-0_flowchart-v2-pointEnd\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M 0 0 L 10 5 L 0 10 z\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431753-4-0_flowchart-v2-pointStart\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"4.5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M 0 5 L 10 10 L 10 0 z\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431753-4-0_flowchart-v2-circleEnd\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"11\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><circle cx=\"5\" cy=\"5\" r=\"5\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></circle></marker><marker id=\"exp-1772053431753-4-0_flowchart-v2-circleStart\" class=\"marker flowchart-v2\" viewBox=\"0 0 10 10\" refX=\"-1\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><circle cx=\"5\" cy=\"5\" r=\"5\" class=\"arrowMarkerPath\" style=\"stroke-width: 1; stroke-dasharray: 1, 0;\"></circle></marker><marker id=\"exp-1772053431753-4-0_flowchart-v2-crossEnd\" class=\"marker cross flowchart-v2\" viewBox=\"0 0 11 11\" refX=\"12\" refY=\"5.2\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><path d=\"M 1,1 l 9,9 M 10,1 l -9,9\" class=\"arrowMarkerPath\" style=\"stroke-width: 2; stroke-dasharray: 1, 0;\"></path></marker><marker id=\"exp-1772053431753-4-0_flowchart-v2-crossStart\" class=\"marker cross flowchart-v2\" viewBox=\"0 0 11 11\" refX=\"-1\" refY=\"5.2\" markerUnits=\"userSpaceOnUse\" markerWidth=\"11\" markerHeight=\"11\" orient=\"auto\"><path d=\"M 1,1 l 9,9 M 10,1 l -9,9\" class=\"arrowMarkerPath\" style=\"stroke-width: 2; stroke-dasharray: 1, 0;\"></path></marker><g class=\"root\"><g class=\"clusters\"><g class=\"cluster \" id=\"HOOKS\" data-look=\"classic\"><rect style=\"fill:#e3f2fd !important;stroke:#1565c0 !important\" x=\"27.0078125\" y=\"179\" width=\"799.58984375\" height=\"122\"></rect><g class=\"cluster-label \" transform=\"translate(340.439453125, 179)\"><g><rect class=\"background\" style=\"stroke: none\"></rect><text y=\"-10.1\" style=\"\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\">🪝</tspan><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\"> Function</tspan><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\"> Component</tspan></tspan></text></g></g></g><g class=\"cluster \" id=\"CLASS\" data-look=\"classic\"><rect style=\"fill:#fff3e0 !important;stroke:#ef6c00 !important\" x=\"8\" y=\"8\" width=\"806.2421875\" height=\"98\"></rect><g class=\"cluster-label \" transform=\"translate(336.57421875, 8)\"><g><rect class=\"background\" style=\"stroke: none\"></rect><text y=\"-10.1\" style=\"\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\">🏛️</tspan><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\"> Class</tspan><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\"> Component</tspan></tspan></text></g></g></g></g><g class=\"edgePaths\"><path d=\"M143.594,81L143.594,85.167C143.594,89.333,143.594,97.667,143.594,107.917C143.594,118.167,143.594,130.333,143.594,142.5C143.594,154.667,143.594,166.833,143.594,178.417C143.594,190,143.594,201,143.594,206.5L143.594,212\" id=\"L_CM_UE1_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_CM_UE1_0\" data-points=\"W3sieCI6MTQzLjU5Mzc1LCJ5Ijo4MX0seyJ4IjoxNDMuNTkzNzUsInkiOjEwNn0seyJ4IjoxNDMuNTkzNzUsInkiOjE0Mi41fSx7IngiOjE0My41OTM3NSwieSI6MTc5fSx7IngiOjE0My41OTM3NSwieSI6MjE2fV0=\" marker-end=\"url(#exp-1772053431753-4-0_flowchart-v2-pointEnd)\"></path><path d=\"M398.191,81L398.191,85.167C398.191,89.333,398.191,97.667,398.191,107.917C398.191,118.167,398.191,130.333,398.191,142.5C398.191,154.667,398.191,166.833,398.191,178.417C398.191,190,398.191,201,398.191,206.5L398.191,212\" id=\"L_CU_UE2_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_CU_UE2_0\" data-points=\"W3sieCI6Mzk4LjE5MTQwNjI1LCJ5Ijo4MX0seyJ4IjozOTguMTkxNDA2MjUsInkiOjEwNn0seyJ4IjozOTguMTkxNDA2MjUsInkiOjE0Mi41fSx7IngiOjM5OC4xOTE0MDYyNSwieSI6MTc5fSx7IngiOjM5OC4xOTE0MDYyNSwieSI6MjE2fV0=\" marker-end=\"url(#exp-1772053431753-4-0_flowchart-v2-pointEnd)\"></path><path d=\"M667.598,81L667.598,85.167C667.598,89.333,667.598,97.667,667.598,107.917C667.598,118.167,667.598,130.333,667.598,142.5C667.598,154.667,667.598,166.833,667.598,176.417C667.598,186,667.598,193,667.598,196.5L667.598,200\" id=\"L_CWU_UE3_0\" class=\" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link\" style=\";\" data-edge=\"true\" data-et=\"edge\" data-id=\"L_CWU_UE3_0\" data-points=\"W3sieCI6NjY3LjU5NzY1NjI1LCJ5Ijo4MX0seyJ4Ijo2NjcuNTk3NjU2MjUsInkiOjEwNn0seyJ4Ijo2NjcuNTk3NjU2MjUsInkiOjE0Mi41fSx7IngiOjY2Ny41OTc2NTYyNSwieSI6MTc5fSx7IngiOjY2Ny41OTc2NTYyNSwieSI6MjA0fV0=\" marker-end=\"url(#exp-1772053431753-4-0_flowchart-v2-pointEnd)\"></path></g><g class=\"edgeLabels\"><g class=\"edgeLabel\" transform=\"translate(143.59375, 142.5)\"><g class=\"label\" data-id=\"L_CM_UE1_0\" transform=\"translate(-41.71875, -11.5)\"><g><rect class=\"background\" style=\"\" x=\"-2\" y=\"-1.5\" width=\"83.4375\" height=\"23\"></rect><text y=\"-10.1\" style=\"\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\">відповідає</tspan></tspan></text></g></g></g><g class=\"edgeLabel\" transform=\"translate(398.19140625, 142.5)\"><g class=\"label\" data-id=\"L_CU_UE2_0\" transform=\"translate(-41.71875, -11.5)\"><g><rect class=\"background\" style=\"\" x=\"-2\" y=\"-1.5\" width=\"83.4375\" height=\"23\"></rect><text y=\"-10.1\" style=\"\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\">відповідає</tspan></tspan></text></g></g></g><g class=\"edgeLabel\" transform=\"translate(667.59765625, 142.5)\"><g class=\"label\" data-id=\"L_CWU_UE3_0\" transform=\"translate(-41.71875, -11.5)\"><g><rect class=\"background\" style=\"\" x=\"-2\" y=\"-1.5\" width=\"83.4375\" height=\"23\"></rect><text y=\"-10.1\" style=\"\"><tspan class=\"text-outer-tspan\" x=\"0\" y=\"-0.1em\" dy=\"1.1em\"><tspan font-style=\"normal\" class=\"text-inner-tspan\" font-weight=\"normal\">відповідає</tspan></tspan></text></g></g></g></g><g class=\"nodes\"><g class=\"node default  \" id=\"flowchart-CM-0\" transform=\"translate(143.59375, 57)\"><rect class=\"basic label-container\" style=\"\" x=\"-100.59375\" y=\"-24\" width=\"201.1875\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-76.59375, -12)\"><rect></rect><foreignObject width=\"153.1875\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>componentDidMount</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-CU-1\" transform=\"translate(398.19140625, 57)\"><rect class=\"basic label-container\" style=\"\" x=\"-104.00390625\" y=\"-24\" width=\"208.0078125\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-80.00390625, -12)\"><rect></rect><foreignObject width=\"160.0078125\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>componentDidUpdate</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-CWU-2\" transform=\"translate(667.59765625, 57)\"><rect class=\"basic label-container\" style=\"\" x=\"-111.64453125\" y=\"-24\" width=\"223.2890625\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-87.64453125, -12)\"><rect></rect><foreignObject width=\"175.2890625\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>componentWillUnmount</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-UE1-3\" transform=\"translate(143.59375, 240)\"><rect class=\"basic label-container\" style=\"\" x=\"-81.5859375\" y=\"-24\" width=\"163.171875\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-57.5859375, -12)\"><rect></rect><foreignObject width=\"115.171875\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>useEffect(fn, [])</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-UE2-4\" transform=\"translate(398.19140625, 240)\"><rect class=\"basic label-container\" style=\"\" x=\"-95.40625\" y=\"-24\" width=\"190.8125\" height=\"48\"></rect><g class=\"label\" style=\"\" transform=\"translate(-71.40625, -12)\"><rect></rect><foreignObject width=\"142.8125\" height=\"24\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;\"><span class=\"nodeLabel \"><p>useEffect(fn, [dep])</p></span></div></foreignObject></g></g><g class=\"node default  \" id=\"flowchart-UE3-5\" transform=\"translate(667.59765625, 240)\"><rect class=\"basic label-container\" style=\"\" x=\"-124\" y=\"-36\" width=\"248\" height=\"72\"></rect><g class=\"label\" style=\"\" transform=\"translate(-100, -24)\"><rect></rect><foreignObject width=\"200\" height=\"48\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;\"><span class=\"nodeLabel \"><p>useEffect(fn, []) + return cleanup</p></span></div></foreignObject></g></g></g></g></g></svg></div>\n<div class=\"note\"><strong>📝 Про class-компоненти</strong> <p>У сучасній розробці використовуються функціональні компоненти з хуками. Class-компоненти — застарілий підхід, але він зустрічається у legacy-коді, тому важливо розуміти відповідність між підходами.</p>\n</div>\n\n","<h1>📦 useState — базове використання</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>useState</strong> — хук, що додає до компонента локальний стан. Повертає пару: поточне значення та функцію для його оновлення.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> Кожен виклик <code>setState</code> запускає перерендер компонента з новим значенням стану.</p>\n<h2>🔧 Синтаксис та типізація</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">import</span> { useState } <span class=\"hljs-keyword\">from</span> <span class=\"hljs-string\">\"react\"</span>;\n\n<span class=\"hljs-comment\">// TypeScript автоматично виводить тип з початкового значення</span>\n<span class=\"hljs-keyword\">const</span> [count, setCount] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-number\">0</span>); <span class=\"hljs-comment\">// number</span>\n<span class=\"hljs-keyword\">const</span> [name, setName] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-string\">\"\"</span>); <span class=\"hljs-comment\">// string</span>\n<span class=\"hljs-keyword\">const</span> [isOpen, setIsOpen] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-literal\">false</span>); <span class=\"hljs-comment\">// boolean</span>\n\n<span class=\"hljs-comment\">// Явна типізація — потрібна для складних типів</span>\n<span class=\"hljs-keyword\">type</span> <span class=\"hljs-title class_\">Status</span> = <span class=\"hljs-string\">\"todo\"</span> | <span class=\"hljs-string\">\"in-progress\"</span> | <span class=\"hljs-string\">\"done\"</span>;\n<span class=\"hljs-keyword\">const</span> [status, setStatus] = useState&lt;<span class=\"hljs-title class_\">Status</span>&gt;(<span class=\"hljs-string\">\"todo\"</span>);\n\n<span class=\"hljs-comment\">// Масив та null — завжди потребують явної типізації</span>\n<span class=\"hljs-keyword\">const</span> [tasks, setTasks] = useState&lt;<span class=\"hljs-title class_\">Task</span>[]&gt;([]);\n<span class=\"hljs-keyword\">const</span> [selected, setSelected] = useState&lt;<span class=\"hljs-title class_\">Task</span> | <span class=\"hljs-literal\">null</span>&gt;(<span class=\"hljs-literal\">null</span>);</code></pre><h2>💻 Приклад: лічильник задач</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskCounter</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-keyword\">const</span> [count, setCount] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-number\">0</span>);\n\n  <span class=\"hljs-keyword\">return</span> (\n    <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">div</span>&gt;</span>\n      <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>Активних задач: {count}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span>\n      <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">button</span> <span class=\"hljs-attr\">onClick</span>=<span class=\"hljs-string\">{()</span> =&gt;</span> setCount(count + 1)}&gt;➕ Додати<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">button</span>&gt;</span>\n      <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">button</span> <span class=\"hljs-attr\">onClick</span>=<span class=\"hljs-string\">{()</span> =&gt;</span> setCount(count - 1)}&gt;➖ Видалити<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">button</span>&gt;</span>\n      <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">button</span> <span class=\"hljs-attr\">onClick</span>=<span class=\"hljs-string\">{()</span> =&gt;</span> setCount(0)}&gt;🔄 Скинути<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">button</span>&gt;</span>\n    <span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">div</span>&gt;</span></span>\n  );\n}</code></pre>","<h1>📦 useState — стан об'єктів та масивів</h1>\n<p><strong>Головна ідея:</strong> React порівнює стан за посиланням (<code>===</code>). Щоб змінити об'єкт або масив, потрібно створити <strong>нову копію</strong> — мутація існуючого об'єкта не викличе перерендер.</p>\n<h2>🔀 Іммутабельне оновлення</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">interface</span> <span class=\"hljs-title class_\">Task</span> {\n  <span class=\"hljs-attr\">id</span>: <span class=\"hljs-built_in\">number</span>;\n  <span class=\"hljs-attr\">title</span>: <span class=\"hljs-built_in\">string</span>;\n  <span class=\"hljs-attr\">status</span>: <span class=\"hljs-string\">\"todo\"</span> | <span class=\"hljs-string\">\"in-progress\"</span> | <span class=\"hljs-string\">\"done\"</span>;\n  <span class=\"hljs-attr\">priority</span>: <span class=\"hljs-string\">\"low\"</span> | <span class=\"hljs-string\">\"medium\"</span> | <span class=\"hljs-string\">\"high\"</span>;\n}\n\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskManager</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-keyword\">const</span> [tasks, setTasks] = useState&lt;<span class=\"hljs-title class_\">Task</span>[]&gt;([]);\n\n  <span class=\"hljs-comment\">// ✅ Додавання — новий масив зі spread</span>\n  <span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">addTask</span> = (<span class=\"hljs-params\">title: <span class=\"hljs-built_in\">string</span></span>) =&gt; {\n    <span class=\"hljs-keyword\">const</span> <span class=\"hljs-attr\">newTask</span>: <span class=\"hljs-title class_\">Task</span> = {\n      <span class=\"hljs-attr\">id</span>: <span class=\"hljs-title class_\">Date</span>.<span class=\"hljs-title function_\">now</span>(),\n      title,\n      <span class=\"hljs-attr\">status</span>: <span class=\"hljs-string\">\"todo\"</span>,\n      <span class=\"hljs-attr\">priority</span>: <span class=\"hljs-string\">\"medium\"</span>,\n    };\n    <span class=\"hljs-title function_\">setTasks</span>([...tasks, newTask]);\n  };\n\n  <span class=\"hljs-comment\">// ✅ Видалення — filter повертає новий масив</span>\n  <span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">removeTask</span> = (<span class=\"hljs-params\">id: <span class=\"hljs-built_in\">number</span></span>) =&gt; {\n    <span class=\"hljs-title function_\">setTasks</span>(tasks.<span class=\"hljs-title function_\">filter</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">task</span>) =&gt;</span> task.<span class=\"hljs-property\">id</span> !== id));\n  };\n\n  <span class=\"hljs-comment\">// ✅ Оновлення — map повертає новий масив</span>\n  <span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">updateStatus</span> = (<span class=\"hljs-params\">id: <span class=\"hljs-built_in\">number</span>, status: Task[<span class=\"hljs-string\">\"status\"</span>]</span>) =&gt; {\n    <span class=\"hljs-title function_\">setTasks</span>(\n      tasks.<span class=\"hljs-title function_\">map</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">task</span>) =&gt;</span> (task.<span class=\"hljs-property\">id</span> === id ? { ...task, status } : task)),\n    );\n  };\n}</code></pre><div class=\"danger\"><strong>🚫 Мутація не викликає перерендер</strong> <pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// ❌ ПОМИЛКА — мутація існуючого масиву</span>\n<span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">addTask</span> = (<span class=\"hljs-params\">title: <span class=\"hljs-built_in\">string</span></span>) =&gt; {\n  tasks.<span class=\"hljs-title function_\">push</span>({ <span class=\"hljs-attr\">id</span>: <span class=\"hljs-title class_\">Date</span>.<span class=\"hljs-title function_\">now</span>(), title, <span class=\"hljs-attr\">status</span>: <span class=\"hljs-string\">\"todo\"</span>, <span class=\"hljs-attr\">priority</span>: <span class=\"hljs-string\">\"medium\"</span> });\n  <span class=\"hljs-title function_\">setTasks</span>(tasks); <span class=\"hljs-comment\">// Посилання НЕ змінилось → React не побачить зміни!</span>\n};</code></pre></div>\n\n","<h1>📦 useState — функціональне оновлення</h1>\n<p><strong>Головна ідея:</strong> Якщо новий стан залежить від попереднього — використовуйте функціональний варіант <code>setState(prev =&gt; ...)</code>. Це гарантує роботу з актуальним значенням навіть при батч-оновленнях.</p>\n<h2>⚡ Проблема \"застарілого стану\"</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// ❌ Проблема — може використовувати застарілий count</span>\n<span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">increment</span> = (<span class=\"hljs-params\"></span>) =&gt; {\n  <span class=\"hljs-title function_\">setCount</span>(count + <span class=\"hljs-number\">1</span>); <span class=\"hljs-comment\">// count тут — значення на момент рендеру</span>\n  <span class=\"hljs-title function_\">setCount</span>(count + <span class=\"hljs-number\">1</span>); <span class=\"hljs-comment\">// Обидва виклики читають той самий count!</span>\n  <span class=\"hljs-comment\">// Результат: count збільшується на 1, а не на 2</span>\n};\n\n<span class=\"hljs-comment\">// ✅ Рішення — функціональне оновлення</span>\n<span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">increment</span> = (<span class=\"hljs-params\"></span>) =&gt; {\n  <span class=\"hljs-title function_\">setCount</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">prev</span>) =&gt;</span> prev + <span class=\"hljs-number\">1</span>); <span class=\"hljs-comment\">// React передає актуальне prev</span>\n  <span class=\"hljs-title function_\">setCount</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">prev</span>) =&gt;</span> prev + <span class=\"hljs-number\">1</span>); <span class=\"hljs-comment\">// count збільшується на 2 ✓</span>\n};</code></pre><h2>⚡ Батч-оновлення (Automatic Batching)</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// React 18: обидва setState об'єднуються в ОДИН перерендер</span>\n<span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">handleClick</span> = (<span class=\"hljs-params\"></span>) =&gt; {\n  <span class=\"hljs-title function_\">setCount</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">c</span>) =&gt;</span> c + <span class=\"hljs-number\">1</span>); <span class=\"hljs-comment\">// Не викликає рендер одразу</span>\n  <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">false</span>); <span class=\"hljs-comment\">// Не викликає рендер одразу</span>\n  <span class=\"hljs-comment\">// → React перерендерює компонент ОДИН раз після обох змін</span>\n};</code></pre><div class=\"tip\"><strong>💡 Підняття стану (Lifting State Up)</strong> <p>Якщо два компоненти мають спільний стан — підніміть його до найближчого спільного батьківського компонента та передайте вниз через props і callback-функції.</p>\n</div>\n\n","<h1>⚡ useEffect — синхронізація з зовнішнім світом</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>useEffect</strong> — хук для виконання побічних ефектів: запити до API, підписки на події, робота з DOM, таймери. Виконується <strong>після</strong> того, як React оновив DOM і браузер відмалював зміни.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> <code>useEffect</code> — це інструмент <strong>синхронізації</strong>, а не lifecycle-метод. Питання \"що робити після монтування?\" замінюється на \"з чим синхронізувати компонент?\"</p>\n<h2>🔧 Синтаксис</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-title function_\">useEffect</span>(\n  <span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-comment\">// 1. Тіло ефекту — виконується після рендеру</span>\n\n    <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> {\n      <span class=\"hljs-comment\">// 2. Cleanup-функція (опціонально) — виконується</span>\n      <span class=\"hljs-comment\">//    перед наступним запуском ефекту та при unmount</span>\n    };\n  },\n  [\n    <span class=\"hljs-comment\">/* масив залежностей */</span>\n  ],\n);</code></pre><h2>⏱️ Порядок виконання</h2>\n<pre><code class=\"language-plaintext hljs\" data-highlighted=\"yes\">Рендер компонента (виклик функції)\n    ↓\nReact оновлює DOM\n    ↓\nБраузер малює пікселі на екрані\n    ↓\nuseEffect спрацьовує ← ви тут</code></pre>","<h1>⚡ useEffect — варіанти масиву залежностей</h1>\n<p><strong>Головна ідея:</strong> Масив залежностей визначає, <strong>коли</strong> ефект повинен перезапуститися.</p>\n<h2>📊 Три варіанти поведінки</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// 1️⃣ Без масиву залежностей — після КОЖНОГО рендеру</span>\n<span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">\"Запускається після кожного рендеру\"</span>);\n}); <span class=\"hljs-comment\">// ⚠️ Рідко потрібне, зазвичай помилка</span>\n\n<span class=\"hljs-comment\">// 2️⃣ Порожній масив — лише після першого рендеру (mount)</span>\n<span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">\"Компонент з'явився на екрані\"</span>);\n  <span class=\"hljs-comment\">// ↑ відповідає componentDidMount у class-компонентах</span>\n}, []);\n\n<span class=\"hljs-comment\">// 3️⃣ Масив з залежностями — при mount та при зміні залежності</span>\n<span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">`Змінився taskId: <span class=\"hljs-subst\">${taskId}</span> — завантажуємо деталі`</span>);\n  <span class=\"hljs-comment\">// fetchTaskDetails(taskId) — виклик функції завантаження</span>\n}, [taskId]); <span class=\"hljs-comment\">// Перезапускається при зміні taskId</span></code></pre><h2>💻 Практичний приклад — завантаження задач</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskList</span>(<span class=\"hljs-params\">{ projectId }: { projectId: <span class=\"hljs-built_in\">number</span> }</span>) {\n  <span class=\"hljs-keyword\">const</span> [tasks, setTasks] = useState&lt;<span class=\"hljs-title class_\">Task</span>[]&gt;([]);\n  <span class=\"hljs-keyword\">const</span> [isLoading, setIsLoading] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-literal\">true</span>);\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-keyword\">let</span> cancelled = <span class=\"hljs-literal\">false</span>;\n    <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">true</span>);\n\n    <span class=\"hljs-title function_\">fetch</span>(<span class=\"hljs-string\">`/api/projects/<span class=\"hljs-subst\">${projectId}</span>/tasks`</span>)\n      .<span class=\"hljs-title function_\">then</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">res</span>) =&gt;</span> res.<span class=\"hljs-title function_\">json</span>())\n      .<span class=\"hljs-title function_\">then</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">data: Task[]</span>) =&gt;</span> {\n        <span class=\"hljs-keyword\">if</span> (!cancelled) {\n          <span class=\"hljs-title function_\">setTasks</span>(data);\n          <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">false</span>);\n        }\n      });\n\n    <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> {\n      cancelled = <span class=\"hljs-literal\">true</span>;\n    };\n  }, [projectId]); <span class=\"hljs-comment\">// При зміні projectId — перезавантажуємо</span>\n\n  <span class=\"hljs-keyword\">if</span> (isLoading) <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>⏳ Завантаження...<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span></span>;\n  <span class=\"hljs-keyword\">return</span> (\n    <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">ul</span>&gt;</span>\n      {tasks.map((t) =&gt; (\n        <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">li</span> <span class=\"hljs-attr\">key</span>=<span class=\"hljs-string\">{t.id}</span>&gt;</span>{t.title}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">li</span>&gt;</span>\n      ))}\n    <span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">ul</span>&gt;</span></span>\n  );\n}</code></pre>","<h1>⚡ useEffect — cleanup-функція</h1>\n<p><strong>Головна ідея:</strong> Cleanup-функція необхідна для скасування підписок та запитів, щоб уникнути витоків пам'яті та виконання коду після демонтування компонента.</p>\n<h2>🧹 Порядок виконання cleanup</h2>\n<pre><code class=\"language-plaintext hljs\" data-highlighted=\"yes\">Mount:    Effect виконується\n          ↓\nUpdate:   Cleanup попереднього ефекту  ← відписка від старих даних\n          Effect виконується знову     ← підписка на нові дані\n          ↓\nUnmount:  Cleanup останнього ефекту    ← звільнення ресурсів</code></pre><h2>💻 Приклад з таймером та підпискою</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskTimer</span>(<span class=\"hljs-params\">{ taskId }: { taskId: <span class=\"hljs-built_in\">number</span> }</span>) {\n  <span class=\"hljs-keyword\">const</span> [elapsed, setElapsed] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-number\">0</span>);\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-comment\">// Запускаємо таймер</span>\n    <span class=\"hljs-keyword\">const</span> intervalId = <span class=\"hljs-built_in\">setInterval</span>(<span class=\"hljs-function\">() =&gt;</span> {\n      <span class=\"hljs-title function_\">setElapsed</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">prev</span>) =&gt;</span> prev + <span class=\"hljs-number\">1</span>);\n    }, <span class=\"hljs-number\">1000</span>);\n\n    <span class=\"hljs-comment\">// Cleanup: зупиняємо таймер при зміні taskId або unmount</span>\n    <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> {\n      <span class=\"hljs-built_in\">clearInterval</span>(intervalId);\n    };\n  }, [taskId]); <span class=\"hljs-comment\">// При зміні задачі — скидаємо таймер</span>\n\n  <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>⏱️ Час: {elapsed}с<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span></span>;\n}</code></pre><div class=\"warning\"><strong>⚠️ Типова помилка без cleanup</strong> <p>Якщо не зупинити інтервал, після демонтування компонента він продовжить працювати і намагатиметься оновити стан неіснуючого компонента. React видасть попередження, а в складних застосунках це призведе до витоків пам'яті.</p>\n</div>\n\n","<h1>🔍 Як useEffect порівнює залежності?</h1>\n<p><strong>Головна ідея:</strong> React порівнює залежності через <strong>строге рівняння</strong> (<code>Object.is</code>). Для примітивів це означає порівняння значень, для об'єктів та функцій — порівняння <strong>посилань</strong>.</p>\n<h2>⚖️ Алгоритм порівняння</h2>\n<pre><code class=\"language-plaintext hljs\" data-highlighted=\"yes\">Після кожного рендеру React порівнює:\n  Object.is(previousDeps[0], currentDeps[0])\n  Object.is(previousDeps[1], currentDeps[1])\n  ...\n\nЯкщо хоча б одна залежність змінилась → ефект перезапускається</code></pre><div class=\"note\"><strong>📝 Object.is vs ===</strong> <p><code>Object.is</code> майже ідентичний <code>===</code>, але коректно обробляє два крайніх випадки: <code>Object.is(NaN, NaN)</code> повертає <code>true</code> (на відміну від <code>===</code>), а <code>Object.is(+0, -0)</code> повертає <code>false</code> (на відміну від <code>===</code>). На практиці це рідко має значення, але важливо знати.</p>\n</div>\n\n\n\n<h2>🔢 Примітиви — порівнюються за значенням</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// ✅ Примітиви: порівнюються за значенням</span>\n<span class=\"hljs-keyword\">const</span> [count, setCount] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-number\">0</span>);\n\n<span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-variable language_\">document</span>.<span class=\"hljs-property\">title</span> = <span class=\"hljs-string\">`Задач: <span class=\"hljs-subst\">${count}</span>`</span>;\n}, [count]); <span class=\"hljs-comment\">// Object.is(0, 0) → не перезапускається; Object.is(0, 1) → перезапускається</span></code></pre><h2>🔗 Об'єкти та масиви — порівнюються за посиланням</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// ❌ Проблема: новий об'єкт при кожному рендері</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskFilter</span>(<span class=\"hljs-params\">{ status }: { status: <span class=\"hljs-built_in\">string</span> }</span>) {\n  <span class=\"hljs-comment\">// Цей об'єкт створюється ЗАНОВО при кожному рендері!</span>\n  <span class=\"hljs-keyword\">const</span> filter = { status, <span class=\"hljs-attr\">page</span>: <span class=\"hljs-number\">1</span> };\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-title function_\">fetchTasks</span>(filter); <span class=\"hljs-comment\">// Нескінченний цикл!</span>\n  }, [filter]); <span class=\"hljs-comment\">// filter !== filter (різні посилання!)</span>\n}</code></pre>","<h1>🔍 Вирішення проблем із залежностями</h1>\n<p><strong>Головна ідея:</strong> Об'єкти та функції, створені всередині компонента, мають нові посилання при кожному рендері. Щоб уникнути зайвих запусків ефекту, винесіть їх за межі компонента або використовуйте мемоізацію.</p>\n<h2>✅ Рішення 1 — розкладіть об'єкт на примітиви</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskFilter</span>(<span class=\"hljs-params\">{ status }: { status: <span class=\"hljs-built_in\">string</span> }</span>) {\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-title function_\">fetchTasks</span>({ status, <span class=\"hljs-attr\">page</span>: <span class=\"hljs-number\">1</span> }); <span class=\"hljs-comment\">// Об'єкт всередині ефекту</span>\n  }, [status]); <span class=\"hljs-comment\">// ✅ Залежність — примітив (string)</span>\n}</code></pre><h2>✅ Рішення 2 — винесіть константи за компонент</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// Константа поза компонентом — створюється один раз</span>\n<span class=\"hljs-keyword\">const</span> <span class=\"hljs-variable constant_\">DEFAULT_FILTER</span> = { <span class=\"hljs-attr\">page</span>: <span class=\"hljs-number\">1</span>, <span class=\"hljs-attr\">pageSize</span>: <span class=\"hljs-number\">10</span> };\n\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskList</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-title function_\">fetchTasks</span>(<span class=\"hljs-variable constant_\">DEFAULT_FILTER</span>); <span class=\"hljs-comment\">// Посилання стабільне</span>\n  }, []); <span class=\"hljs-comment\">// [] — коректно, DEFAULT_FILTER не змінюється</span>\n}</code></pre><h2>📊 Поведінка різних типів залежностей</h2>\n<table>\n<thead>\n<tr>\n<th>Тип залежності</th>\n<th>Приклад</th>\n<th>Поведінка</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>number</code>, <code>string</code>, <code>boolean</code></td>\n<td><code>count</code>, <code>status</code>, <code>isAdmin</code></td>\n<td>Порівнюється за значенням ✅</td>\n</tr>\n<tr>\n<td>Об'єкт/масив <strong>поза</strong> компонентом</td>\n<td><code>const OBJ = {}</code></td>\n<td>Стабільне посилання ✅</td>\n</tr>\n<tr>\n<td>Об'єкт/масив <strong>всередині</strong> компонента</td>\n<td><code>const obj = {}</code></td>\n<td>Нове посилання кожен рендер ⚠️</td>\n</tr>\n<tr>\n<td>Функція <strong>всередині</strong> компонента</td>\n<td><code>const fn = () =&gt; {}</code></td>\n<td>Нове посилання кожен рендер ⚠️</td>\n</tr>\n</tbody></table>\n<div class=\"tip\"><strong>💡 ESLint plugin</strong> <p><code>eslint-plugin-react-hooks</code> автоматично перевіряє правильність масивів залежностей і попереджає про пропущені або зайві залежності.</p>\n</div>\n\n","<h1>🔗 useRef — доступ до DOM</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>useRef</strong> — хук, що повертає мутабельний об'єкт <code>{ current: ... }</code>. Зміна <code>.current</code> <strong>не</strong> викликає перерендер.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> useRef використовується у двох сценаріях: доступ до DOM-елементів та зберігання значень між рендерами без перерендеру.</p>\n<h2>🎯 Сценарій 1 — доступ до DOM</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">import</span> { useRef, useEffect } <span class=\"hljs-keyword\">from</span> <span class=\"hljs-string\">\"react\"</span>;\n\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskTitleInput</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-comment\">// Типізація: HTMLInputElement | null (null до монтування)</span>\n  <span class=\"hljs-keyword\">const</span> inputRef = useRef&lt;<span class=\"hljs-title class_\">HTMLInputElement</span>&gt;(<span class=\"hljs-literal\">null</span>);\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-comment\">// Після монтування inputRef.current вже доступний</span>\n    inputRef.<span class=\"hljs-property\">current</span>?.<span class=\"hljs-title function_\">focus</span>(); <span class=\"hljs-comment\">// Автофокус на полі вводу</span>\n  }, []);\n\n  <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">input</span> <span class=\"hljs-attr\">ref</span>=<span class=\"hljs-string\">{inputRef}</span> <span class=\"hljs-attr\">type</span>=<span class=\"hljs-string\">\"text\"</span> <span class=\"hljs-attr\">placeholder</span>=<span class=\"hljs-string\">\"Назва задачі\"</span> /&gt;</span></span>;\n}</code></pre><h2>💾 Сценарій 2 — мутабельне значення між рендерами</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskStopwatch</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-keyword\">const</span> [isRunning, setIsRunning] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-literal\">false</span>);\n  <span class=\"hljs-comment\">// Зберігаємо id інтервалу — зміна не потребує рендеру</span>\n  <span class=\"hljs-keyword\">const</span> intervalRef = useRef&lt;<span class=\"hljs-title class_\">ReturnType</span>&lt;<span class=\"hljs-keyword\">typeof</span> <span class=\"hljs-built_in\">setInterval</span>&gt; | <span class=\"hljs-literal\">null</span>&gt;(<span class=\"hljs-literal\">null</span>);\n\n  <span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">start</span> = (<span class=\"hljs-params\"></span>) =&gt; {\n    intervalRef.<span class=\"hljs-property\">current</span> = <span class=\"hljs-built_in\">setInterval</span>(<span class=\"hljs-function\">() =&gt;</span> {\n      <span class=\"hljs-comment\">/* ... */</span>\n    }, <span class=\"hljs-number\">1000</span>);\n    <span class=\"hljs-title function_\">setIsRunning</span>(<span class=\"hljs-literal\">true</span>);\n  };\n\n  <span class=\"hljs-keyword\">const</span> <span class=\"hljs-title function_\">stop</span> = (<span class=\"hljs-params\"></span>) =&gt; {\n    <span class=\"hljs-keyword\">if</span> (intervalRef.<span class=\"hljs-property\">current</span>) {\n      <span class=\"hljs-built_in\">clearInterval</span>(intervalRef.<span class=\"hljs-property\">current</span>);\n      intervalRef.<span class=\"hljs-property\">current</span> = <span class=\"hljs-literal\">null</span>;\n    }\n    <span class=\"hljs-title function_\">setIsRunning</span>(<span class=\"hljs-literal\">false</span>);\n  };\n}</code></pre><div class=\"note\"><strong>📝 useState vs useRef</strong> <p><strong>useState</strong>: зміна → перерендер → UI оновлюється. Для відображення даних.<br><strong>useRef</strong>: зміна <code>.current</code> → <strong>без</strong> перерендеру. Для \"невидимих\" даних та DOM-доступу.</p>\n</div>\n\n","<h1>🧩 Custom hooks — перевикористання логіки</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>Custom hook</strong> — звичайна JavaScript-функція, ім'я якої починається з <code>use</code> і яка викликає один або більше вбудованих хуків.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> Custom hooks дозволяють виносити повторювану логіку зі стану та ефектів у перевикористовувані функції — так само, як звичайні функції виносять повторюваний код.</p>\n<h2>🔧 Приклад: useToggle</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// hooks/useToggle.ts</span>\n<span class=\"hljs-keyword\">import</span> { useState, useCallback } <span class=\"hljs-keyword\">from</span> <span class=\"hljs-string\">\"react\"</span>;\n\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">useToggle</span>(<span class=\"hljs-params\">initialValue = <span class=\"hljs-literal\">false</span></span>) {\n  <span class=\"hljs-keyword\">const</span> [value, setValue] = <span class=\"hljs-title function_\">useState</span>(initialValue);\n\n  <span class=\"hljs-keyword\">const</span> toggle = <span class=\"hljs-title function_\">useCallback</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-title function_\">setValue</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">prev</span>) =&gt;</span> !prev);\n  }, []);\n\n  <span class=\"hljs-keyword\">return</span> [value, toggle] <span class=\"hljs-keyword\">as</span> <span class=\"hljs-keyword\">const</span>;\n}\n\n<span class=\"hljs-comment\">// Використання в компоненті</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskCard</span>(<span class=\"hljs-params\">{ task }: { task: Task }</span>) {\n  <span class=\"hljs-keyword\">const</span> [isExpanded, toggleExpanded] = <span class=\"hljs-title function_\">useToggle</span>(<span class=\"hljs-literal\">false</span>);\n\n  <span class=\"hljs-keyword\">return</span> (\n    <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">div</span>&gt;</span>\n      <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">h3</span> <span class=\"hljs-attr\">onClick</span>=<span class=\"hljs-string\">{toggleExpanded}</span>&gt;</span>{task.title}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">h3</span>&gt;</span>\n      {isExpanded &amp;&amp; <span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>{task.description}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span>}\n    <span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">div</span>&gt;</span></span>\n  );\n}</code></pre><h2>🔧 Приклад: useTaskLoader</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-comment\">// hooks/useTaskLoader.ts</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">useTaskLoader</span>(<span class=\"hljs-params\">taskId: <span class=\"hljs-built_in\">number</span></span>) {\n  <span class=\"hljs-keyword\">const</span> [task, setTask] = useState&lt;<span class=\"hljs-title class_\">Task</span> | <span class=\"hljs-literal\">null</span>&gt;(<span class=\"hljs-literal\">null</span>);\n  <span class=\"hljs-keyword\">const</span> [isLoading, setIsLoading] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-literal\">true</span>);\n  <span class=\"hljs-keyword\">const</span> [error, setError] = useState&lt;<span class=\"hljs-built_in\">string</span> | <span class=\"hljs-literal\">null</span>&gt;(<span class=\"hljs-literal\">null</span>);\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-keyword\">let</span> cancelled = <span class=\"hljs-literal\">false</span>; <span class=\"hljs-comment\">// Захист від race condition</span>\n    <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">true</span>);\n    <span class=\"hljs-title function_\">setError</span>(<span class=\"hljs-literal\">null</span>);\n\n    <span class=\"hljs-title function_\">fetch</span>(<span class=\"hljs-string\">`/api/tasks/<span class=\"hljs-subst\">${taskId}</span>`</span>)\n      .<span class=\"hljs-title function_\">then</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">res</span>) =&gt;</span> res.<span class=\"hljs-title function_\">json</span>())\n      .<span class=\"hljs-title function_\">then</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">data</span>) =&gt;</span> {\n        <span class=\"hljs-keyword\">if</span> (!cancelled) {\n          <span class=\"hljs-title function_\">setTask</span>(data);\n          <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">false</span>);\n        }\n      })\n      .<span class=\"hljs-title function_\">catch</span>(<span class=\"hljs-function\">(<span class=\"hljs-params\">err</span>) =&gt;</span> {\n        <span class=\"hljs-keyword\">if</span> (!cancelled) {\n          <span class=\"hljs-title function_\">setError</span>(err.<span class=\"hljs-property\">message</span>);\n          <span class=\"hljs-title function_\">setIsLoading</span>(<span class=\"hljs-literal\">false</span>);\n        }\n      });\n\n    <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> {\n      cancelled = <span class=\"hljs-literal\">true</span>;\n    }; <span class=\"hljs-comment\">// Cleanup скасовує застарілий запит</span>\n  }, [taskId]);\n\n  <span class=\"hljs-keyword\">return</span> { task, isLoading, error };\n}\n\n<span class=\"hljs-comment\">// Компонент стає чистим — без деталей завантаження</span>\n<span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskDetail</span>(<span class=\"hljs-params\">{ taskId }: { taskId: <span class=\"hljs-built_in\">number</span> }</span>) {\n  <span class=\"hljs-keyword\">const</span> { task, isLoading, error } = <span class=\"hljs-title function_\">useTaskLoader</span>(taskId);\n\n  <span class=\"hljs-keyword\">if</span> (isLoading) <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>⏳ Завантаження...<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span></span>;\n  <span class=\"hljs-keyword\">if</span> (error) <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">p</span>&gt;</span>❌ Помилка: {error}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">p</span>&gt;</span></span>;\n  <span class=\"hljs-keyword\">if</span> (!task) <span class=\"hljs-keyword\">return</span> <span class=\"hljs-literal\">null</span>;\n  <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">h2</span>&gt;</span>{task.title}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">h2</span>&gt;</span></span>;\n}</code></pre>","<h1>⚠️ Stale Closure Trap</h1>\n<div class=\"info\"><strong>ℹ️ Визначення</strong> <p><strong>Stale closure</strong> (застаріле замикання) — ситуація, коли колбек у <code>useEffect</code> або обробник події \"запам'ятовує\" старе значення змінної зі стану, оскільки функція була створена під час попереднього рендеру.</p>\n</div>\n\n\n\n<p><strong>Головна ідея:</strong> Функції у JavaScript замикають значення на момент свого <strong>створення</strong>. Якщо компонент перерендерився, але функція залишилась старою — вона бачить старий стан.</p>\n<h2>🐛 Демонстрація проблеми</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">function</span> <span class=\"hljs-title function_\">TaskNotifier</span>(<span class=\"hljs-params\"></span>) {\n  <span class=\"hljs-keyword\">const</span> [count, setCount] = <span class=\"hljs-title function_\">useState</span>(<span class=\"hljs-number\">0</span>);\n\n  <span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-comment\">// Ця функція створена при першому рендері</span>\n    <span class=\"hljs-comment\">// Вона \"замкнула\" count = 0 і ніколи не отримає нове значення</span>\n    <span class=\"hljs-keyword\">const</span> timerId = <span class=\"hljs-built_in\">setTimeout</span>(<span class=\"hljs-function\">() =&gt;</span> {\n      <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">`Кількість задач: <span class=\"hljs-subst\">${count}</span>`</span>); <span class=\"hljs-comment\">// ❌ Завжди 0!</span>\n    }, <span class=\"hljs-number\">3000</span>);\n\n    <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> <span class=\"hljs-built_in\">clearTimeout</span>(timerId);\n  }, []); <span class=\"hljs-comment\">// Порожній масив → ефект не перестворюється → count застарів</span>\n\n  <span class=\"hljs-keyword\">return</span> <span class=\"language-xml\"><span class=\"hljs-tag\">&lt;<span class=\"hljs-name\">button</span> <span class=\"hljs-attr\">onClick</span>=<span class=\"hljs-string\">{()</span> =&gt;</span> setCount((c) =&gt; c + 1)}&gt;Задач: {count}<span class=\"hljs-tag\">&lt;/<span class=\"hljs-name\">button</span>&gt;</span></span>;\n}</code></pre><h2>✅ Рішення 1 — додайте залежність</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-keyword\">const</span> timerId = <span class=\"hljs-built_in\">setTimeout</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">`Кількість задач: <span class=\"hljs-subst\">${count}</span>`</span>); <span class=\"hljs-comment\">// ✅ Актуальне значення</span>\n  }, <span class=\"hljs-number\">3000</span>);\n  <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> <span class=\"hljs-built_in\">clearTimeout</span>(timerId);\n}, [count]); <span class=\"hljs-comment\">// Ефект перестворюється при зміні count</span></code></pre><h2>✅ Рішення 2 — useRef для актуального значення</h2>\n<pre><code class=\"language-tsx hljs language-typescript\" data-highlighted=\"yes\"><span class=\"hljs-keyword\">const</span> countRef = <span class=\"hljs-title function_\">useRef</span>(count);\ncountRef.<span class=\"hljs-property\">current</span> = count; <span class=\"hljs-comment\">// Оновлюємо при кожному рендері</span>\n\n<span class=\"hljs-title function_\">useEffect</span>(<span class=\"hljs-function\">() =&gt;</span> {\n  <span class=\"hljs-keyword\">const</span> timerId = <span class=\"hljs-built_in\">setTimeout</span>(<span class=\"hljs-function\">() =&gt;</span> {\n    <span class=\"hljs-variable language_\">console</span>.<span class=\"hljs-title function_\">log</span>(<span class=\"hljs-string\">`Кількість задач: <span class=\"hljs-subst\">${countRef.current}</span>`</span>); <span class=\"hljs-comment\">// ✅ Завжди актуальне</span>\n  }, <span class=\"hljs-number\">3000</span>);\n  <span class=\"hljs-keyword\">return</span> <span class=\"hljs-function\">() =&gt;</span> <span class=\"hljs-built_in\">clearTimeout</span>(timerId);\n}, []); <span class=\"hljs-comment\">// Ефект не перестворюється, але значення актуальне</span></code></pre>","<h1>✅ Ключові висновки</h1>\n<div class=\"success\"><strong>✅ Підсумок лекції</strong> <p><strong>📌 Що ми вивчили:</strong></p>\n<ol>\n<li><p><strong>Правила хуків:</strong> викликати лише на верхньому рівні та тільки у React-функціях — це технічне обмеження, не рекомендація</p>\n</li>\n<li><p><strong>Lifecycle:</strong> Mount → Update → Unmount. <code>useEffect</code> з різними масивами залежностей відповідає різним фазам</p>\n</li>\n<li><p><strong>useState:</strong> стан об'єктів і масивів оновлюється іммутабельно — потрібна нова копія, а не мутація</p>\n</li>\n<li><p><strong>useEffect:</strong> порівнює залежності через <code>Object.is</code>. Примітиви — за значенням, об'єкти/функції — за посиланням</p>\n</li>\n<li><p><strong>Cleanup:</strong> завжди скасовуйте підписки, таймери та запити у cleanup-функції</p>\n</li>\n<li><p><strong>useRef:</strong> два сценарії — доступ до DOM і зберігання значень без перерендеру</p>\n</li>\n<li><p><strong>Custom hooks:</strong> виносьте повторювану логіку у функції з префіксом <code>use</code></p>\n</li>\n<li><p><strong>Stale closure:</strong> якщо ефект \"бачить\" застарілі значення — додайте їх у масив залежностей або використовуйте useRef</p>\n</li>\n</ol>\n</div>\n\n","<h1>❓ Контрольні питання</h1>\n<ol>\n<li><p>🤔 Чому хуки не можна викликати всередині умов або циклів? Що станеться, якщо порушити це правило?</p>\n</li>\n<li><p>🤔 Яка різниця між <code>useEffect(() =&gt; {...}, [])</code> та <code>useEffect(() =&gt; {...}, [id])</code>? Коли кожен варіант доречний?</p>\n</li>\n<li><p>🤔 Чому при оновленні масиву або об'єкта в стані потрібно створювати нову копію, а не мутувати існуючий?</p>\n</li>\n<li><p>🤔 Як React порівнює залежності у <code>useEffect</code>? Чому об'єкт <code>{ status: 'todo' }</code> у масиві залежностей може викликати нескінченний цикл?</p>\n</li>\n<li><p>🤔 Коли потрібна cleanup-функція в <code>useEffect</code>? Наведіть два приклади побічних ефектів, що потребують cleanup.</p>\n</li>\n<li><p>🤔 Яка різниця між <code>useState</code> та <code>useRef</code> для зберігання значень? Коли обирати кожен?</p>\n</li>\n<li><p>🤔 Що таке stale closure у контексті хуків і як його уникнути?</p>\n</li>\n</ol>\n","<h1>📖 Глосарій термінів</h1>\n<table>\n<thead>\n<tr>\n<th>Термін</th>\n<th>English</th>\n<th>Визначення</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Хук</td>\n<td>Hook</td>\n<td>Функція React з префіксом <code>use</code> для доступу до можливостей React</td>\n</tr>\n<tr>\n<td>Стан</td>\n<td>State</td>\n<td>Дані компонента, зміна яких викликає перерендер</td>\n</tr>\n<tr>\n<td>Побічний ефект</td>\n<td>Side Effect</td>\n<td>Дія поза React: запит до API, таймер, робота з DOM</td>\n</tr>\n<tr>\n<td>Іммутабельність</td>\n<td>Immutability</td>\n<td>Принцип незмінності даних — оновлення через створення копій</td>\n</tr>\n<tr>\n<td>Замикання</td>\n<td>Closure</td>\n<td>Функція, що \"пам'ятає\" змінні з місця свого створення</td>\n</tr>\n<tr>\n<td>Cleanup</td>\n<td>Cleanup</td>\n<td>Функція скасування ефекту: відписка, очищення таймерів</td>\n</tr>\n<tr>\n<td>Батч-оновлення</td>\n<td>Batching</td>\n<td>Об'єднання кількох <code>setState</code> в один перерендер</td>\n</tr>\n<tr>\n<td>Мемоізація</td>\n<td>Memoization</td>\n<td>Кешування результату функції для уникнення повторних обчислень</td>\n</tr>\n</tbody></table>\n","<h1>📖 Глосарій абревіатур</h1>\n<table>\n<thead>\n<tr>\n<th>Абревіатура</th>\n<th>Розшифровка</th>\n<th>Переклад</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>DOM</td>\n<td>Document Object Model</td>\n<td>Об'єктна модель документа</td>\n</tr>\n<tr>\n<td>SPA</td>\n<td>Single Page Application</td>\n<td>Односторінковий застосунок</td>\n</tr>\n<tr>\n<td>API</td>\n<td>Application Programming Interface</td>\n<td>Програмний інтерфейс застосунку</td>\n</tr>\n<tr>\n<td>JSX</td>\n<td>JavaScript XML</td>\n<td>Синтаксичне розширення JavaScript для опису UI</td>\n</tr>\n<tr>\n<td>TDZ</td>\n<td>Temporal Dead Zone</td>\n<td>Тимчасова мертва зона (JavaScript)</td>\n</tr>\n<tr>\n<td>UI</td>\n<td>User Interface</td>\n<td>Інтерфейс користувача</td>\n</tr>\n</tbody></table>\n"];let currentSlideIndex=0;
+function showSlide(i){if(i<0||i>=slides.length)return;currentSlideIndex=i;const el=document.getElementById("current-slide");el.innerHTML=slides[i];el.scrollTop=0;document.getElementById("progress-bar").style.width=((i+1)/slides.length*100)+"%";document.getElementById("slide-number").textContent=(i+1)+" / "+slides.length;updateSidebarActive();}
+function nextSlide(){if(currentSlideIndex<slides.length-1)showSlide(currentSlideIndex+1);}
+function previousSlide(){if(currentSlideIndex>0)showSlide(currentSlideIndex-1);}
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");}
+function toggleHelp(){document.getElementById("help-overlay").classList.toggle("hidden");}
+function toggleFullscreen(){if(!document.fullscreenElement){const pc=document.getElementById("presentation-container");if(pc.requestFullscreen)pc.requestFullscreen();else if(pc.webkitRequestFullscreen)pc.webkitRequestFullscreen();else if(pc.msRequestFullscreen)pc.msRequestFullscreen();else if(pc.mozRequestFullScreen)pc.mozRequestFullScreen();}else{if(document.exitFullscreen)document.exitFullscreen();else if(document.webkitExitFullscreen)document.webkitExitFullscreen();else if(document.msExitFullscreen)document.msExitFullscreen();else if(document.mozCancelFullScreen)document.mozCancelFullScreen();}}
+function generateSidebar(){const sc=document.getElementById("sidebar-content");sc.innerHTML="";slides.forEach((html,idx)=>{const t=document.createElement("div");t.className="slide-thumbnail";if(idx===0)t.classList.add("active");const tmp=document.createElement("div");tmp.innerHTML=html;const title=tmp.querySelector("h1,h2");const titleText=title?title.textContent:("Слайд "+(idx+1));const textContent=tmp.textContent.replace(/s+/g," ").trim();const preview=textContent.substring(0,100)+(textContent.length>100?"...":"");t.innerHTML="<div class=\"slide-thumbnail-number\">"+(idx+1)+"</div><div class=\"slide-thumbnail-title\">"+titleText+"</div><div class=\"slide-thumbnail-content\">"+preview+"</div>";t.onclick=()=>{showSlide(idx);if(window.innerWidth<1024)toggleSidebar();};sc.appendChild(t);});}
+function updateSidebarActive(){document.querySelectorAll(".slide-thumbnail").forEach((th,idx)=>{if(idx===currentSlideIndex){th.classList.add("active");th.scrollIntoView({behavior:"smooth",block:"nearest"});}else th.classList.remove("active");});}
+document.addEventListener("keydown",e=>{switch(e.key){case"ArrowLeft":previousSlide();break;case"ArrowRight":case" ":e.preventDefault();nextSlide();break;case"f":case"F":toggleFullscreen();break;case"s":case"S":toggleSidebar();break;case"?":toggleHelp();break;case"Escape":const sb=document.getElementById("sidebar");const ho=document.getElementById("help-overlay");if(sb.classList.contains("open"))toggleSidebar();else if(!ho.classList.contains("hidden"))ho.classList.add("hidden");break;}});
+generateSidebar();showSlide(0);</script></body></html>
