@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { Task, TaskPriority, TaskStatus } from "../../types/task";
+import styles from "./NewTaskPage.module.css";
 
 interface NewTaskPageProps {
   onAdd: (task: Task) => void;
@@ -12,14 +13,17 @@ export default function NewTaskPage({ onAdd }: NewTaskPageProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Назва задачі обов'язкова!");
+      setError("Назва задачі обов'язкова!");
       return;
     }
+
+    setError("");
 
     const newTask: Task = {
       id: crypto.randomUUID(),
@@ -35,40 +39,60 @@ export default function NewTaskPage({ onAdd }: NewTaskPageProps) {
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "2rem auto" }}>
-      <h2>➕ Нова задача</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <label>
-          Назва:
+    <div className={styles.container}>
+      <h2 className={styles.title}>📝 Нова задача</h2>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.field}>
+          <label htmlFor="title">Назва *</label>
           <input
+            id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Введіть назву задачі"
-            required
           />
-        </label>
+          {error && <span className={styles.error}>{error}</span>}
+        </div>
 
-        <label>
-          Опис:
+        <div className={styles.field}>
+          <label htmlFor="description">Опис</label>
           <textarea
+            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Введіть опис задачі (необов'язково)"
+            placeholder="Додатковий опис (необов'язково)"
           />
-        </label>
+        </div>
 
-        <label>
-          Пріоритет:
-          <select value={priority} onChange={(e) => setPriority(e.target.value as TaskPriority)}>
-            <option value="low">Низький</option>
-            <option value="medium">Середній</option>
-            <option value="high">Високий</option>
+        <div className={styles.field}>
+          <label htmlFor="priority">Пріоритет</label>
+          <select
+            id="priority"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as TaskPriority)}
+          >
+            <option value="low">🟢 Низький</option>
+            <option value="medium">🟡 Середній</option>
+            <option value="high">🔴 Високий</option>
           </select>
-        </label>
+        </div>
 
-        <button type="submit">Створити задачу</button>
+        <div className={styles.actions}>
+          <button type="submit" className={styles.submitBtn}>
+            ✅ Створити задачу
+          </button>
+          <button
+            type="button"
+            className={styles.cancelBtn}
+            onClick={() => {
+              navigate("/tasks")
+            }}
+          >
+            Скасувати
+          </button>
+        </div>
       </form>
     </div>
-  );
+    );
 }
