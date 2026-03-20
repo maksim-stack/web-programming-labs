@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-// import Layout from "./components/Layout/Layout";
-// import TasksPage from "./pages/TasksPage/TasksPage";
-// import TaskDetailPage from "./pages/TaskDetailPage/TaskDetailPage";
-// import NewTaskPage from "./pages/NewTaskPage/NewTaskPage";
+import Layout from "./components/Layout/Layout";
+import TasksPage from "./pages/TasksPage/TasksPage";
+import TaskDetailPage from "./pages/TaskDetailPage/TaskDetailPage";
+import NewTaskPage from "./pages/NewTaskPage/NewTaskPage";
 import { INITIAL_TASKS } from "./data/initialTasks";
 import type { Task } from "./types/task";
 
@@ -18,7 +18,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/*<Route path="/" element={<Layout />}>
+        <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/tasks" replace />} />
           <Route path="tasks" element={<TasksPage tasks={tasks} onDelete={deleteTask} />} />
           <Route path="tasks/new" element={<NewTaskPage onAdd={addTask} />} />
@@ -26,7 +26,7 @@ export default function App() {
             path="tasks/:id"
             element={<TaskDetailPage tasks={tasks} onUpdate={updateTask} onDelete={deleteTask} />}
           />
-        </Route>*/}
+        </Route>
       </Routes>
     </BrowserRouter>
   );
