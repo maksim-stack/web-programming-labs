@@ -19,6 +19,21 @@ function App() {
     }
   })
 
+  const updateTodoMutation = useMutation({
+    mutationFn: ({ id, completed }: { id: number, completed: boolean }) => 
+      todosApi.update(id, { completed }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+
+  const removeTodoMutation = useMutation({
+    mutationFn: (id: number) => todosApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -54,7 +69,15 @@ function App() {
               textDecoration: todo.completed ? 'line-through' : 'none',
             }}
           >
-          {todo.title}
+            <input 
+              type="checkbox" 
+              checked={todo.completed} 
+              onChange={(e) => updateTodoMutation.mutate({ id: todo.id, completed: e.target.checked })} 
+            />
+            {todo.title}
+            <button onClick={() => removeTodoMutation.mutate(todo.id)} disabled={removeTodoMutation.isPending}>
+              {removeTodoMutation.isPending ? 'Видаляємо...' : 'Видалити'}
+            </button>
           </li>
         ))}
       </ul>
