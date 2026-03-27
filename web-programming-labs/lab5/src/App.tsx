@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { todosApi } from './api/todos'
 import { useState } from 'react'
 
+import './App.css'
+
 function App() {
   const queryClient = useQueryClient()
   const [newTitle, setNewTitle] = useState('')
@@ -43,10 +45,10 @@ function App() {
   }
 
   return (
-    <div>
+    <div className="App">
       <h1>Todos</h1>
 
-      <div>
+      <div className="input-container">
         <input
           type="text"
           value={newTitle}
@@ -65,9 +67,7 @@ function App() {
         {data?.map((todo) => (
           <li 
             key={todo.id} 
-            style={{
-              textDecoration: todo.completed ? 'line-through' : 'none',
-            }}
+            className={todo.completed ? 'completed' : ''}
           >
             <input 
               type="checkbox" 
