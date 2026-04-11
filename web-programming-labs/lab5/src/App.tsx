@@ -54,6 +54,11 @@ function App() {
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           placeholder="Нове завдання"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && newTitle.trim() && !addTodoMutation.isPending) {
+              addTodoMutation.mutate(newTitle)
+            }
+          }}
         />
         <button
           onClick={() => addTodoMutation.mutate(newTitle)}
@@ -69,14 +74,19 @@ function App() {
             key={todo.id} 
             className={todo.completed ? 'completed' : ''}
           >
-            <input 
-              type="checkbox" 
-              checked={todo.completed} 
-              onChange={(e) => updateTodoMutation.mutate({ id: todo.id, completed: e.target.checked })} 
-            />
-            {todo.title}
-            <button onClick={() => removeTodoMutation.mutate(todo.id)} disabled={removeTodoMutation.isPending}>
-              {removeTodoMutation.isPending ? 'Видаляємо...' : 'Видалити'}
+            <label>
+              <input className='checkbox-cross'
+                type="checkbox" 
+                checked={todo.completed} 
+                onChange={(e) => updateTodoMutation.mutate({ id: todo.id, completed: e.target.checked })} 
+              />
+            <span className='todo-text'>{todo.title}</span>
+            </label>
+            <button 
+              onClick={() => removeTodoMutation.mutate(todo.id)} 
+              disabled={removeTodoMutation.isPending && removeTodoMutation.variables === todo.id}
+            >
+               {removeTodoMutation.isPending && removeTodoMutation.variables === todo.id ? 'Видаляємо...' : 'Видалити'}
             </button>
           </li>
         ))}

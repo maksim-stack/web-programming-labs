@@ -1,12 +1,12 @@
 /* Общий контейнер */
 .App {
-  max-width: 600px;
+  max-width: 800px;
   margin: 50px auto;
-  padding: 20px;
+  padding: 30px;
   background-color: #fefefe;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Arial', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Заголовок */
@@ -67,11 +67,21 @@ ul {
 li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 12px 10px;
   border-bottom: 1px solid #eee;
-  transition: background-color 0.2s;
   border-radius: 8px;
+}
+
+li {
+  transition: background-color 0.2s ease;
+}
+
+
+li label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 li:hover {
@@ -85,13 +95,18 @@ li input[type="checkbox"] {
   height: 18px;
 }
 
+.checkbox-cross {
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
 /* Кнопка удаления */
 li button {
   background-color: #ef4444;
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 6px 6px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -107,6 +122,17 @@ li button:disabled {
 
 /* Закрашенный текст для completed */
 li.completed {
+  opacity: 0.7;
+}
+
+.todo-text {
+  font-size: 16px;
+  display: block;
+  line-height: 1.4;
+  min-height: 1.4em;
+}
+
+li.completed .todo-text {
   text-decoration: line-through;
   color: #6b7280;
 }
