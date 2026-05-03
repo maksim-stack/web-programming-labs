@@ -1,98 +1,180 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 Лабораторна робота №7 — CRUD API на Nest.js
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📌 Опис проєкту
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Цей проєкт — RESTful CRUD API, створений на **Nest.js**.
 
-## Description
+Дозволяє керувати списком задач із повною реалізацією операцій:
+- створення (Create)
+- читання (Read)
+- оновлення (Update)
+- видалення (Delete)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Дані зберігаються в пам’яті (масив), без використання бази даних, згідно з умовою лабораторної роботи.
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 🎯 Мета роботи
+
+Реалізувати повноцінний CRUD API з використанням:
+
+- архітектури Nest.js (Module / Controller / Service)
+- Dependency Injection
+- DTO (Data Transfer Objects)
+- валідації через class-validator
+- глобального ValidationPipe
+- HTTP статус-кодів
+
+---
+
+## ⚙️ Використані технології
+
+- Node.js (v18+)
+- Nest.js
+- TypeScript
+- class-validator
+- class-transformer
+- REST API
+
+---
+
+## 📁 Структура проєкту
+```
+src/
+├── tasks/
+│ ├── dto/
+│ │ ├── create-task.dto.ts
+│ │ └── update-task.dto.ts
+│ ├── entities/
+│ │ └── task.entity.ts
+│ ├── tasks.controller.ts
+│ ├── tasks.service.ts
+│ └── tasks.module.ts
+├── app.module.ts
+└── main.ts
 ```
 
-## Compile and run the project
 
+---
+
+## 📦 Модель Task
+
+Кожна задача має поля:
+
+```ts
+id: string;
+title: string;
+description?: string;
+status: 'todo' | 'in-progress' | 'done';
+priority: 'low' | 'medium' | 'high';
+createdAt: Date;
+```
+## 🌐 API ендпоінти
+| Метод	|  URL	                | Опис	                | Статус            |
+| :--   |  :--                  | :--                   |   :--             |
+| GET   | /tasks                | Отримати всі задачі   | 200               |
+| GET	| /tasks/:id	        | Отримати задачу по ID	| 200 / 404         |
+| GET	| /tasks/search?status  | Фільтр по статусу     | 200               |
+| POST	| /tasks                | Створити задачу	    | 201 / 400         |
+| PATCH | /tasks/:id            | Оновити задачу        |	200 / 400 / 404 |
+| DELETE|/tasks/:id             | Видалити задачу	    | 204 / 404         |
+
+## 🔐 Валідація
+* DTO з class-validator
+* глобальний ValidationPipe
+* `whitelist: true` — видаляє зайві поля
+* `transform: true` — перетворює дані
+
+## 📥 Запуск проєкту
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run start:dev
+```
+Сервер працює на:
+```
+http://localhost:3000
 ```
 
-## Run tests
-
+## 🧪 Тестування
+Можна використовувати:
+* Postman
+* curl
+Приклад:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl http://localhost:3000/tasks
 ```
 
-## Deployment
+## 📌 Реалізовано
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- [x] CRUD API
+- [x] DTO валідація
+- [x] Dependency Injection
+- [x] Service / Controller архітектура
+- [x] HTTP статус-коди
+- [x] In-memory зберігання даних
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 📚 Контрольні запитання
+### 1. Яка відповідальність Service у Nest.js? Чому він не повинен містити HTTP-виключення?
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+*Відповідь:*
+
+Service відповідає лише за бізнес-логіку та роботу з даними (створення, пошук, оновлення, видалення).
+Він не повинен знати нічого про HTTP (статуси, запити, відповіді).
+
+HTTP-виключення (`NotFoundException`, `BadRequestException`) належать до рівня Controller, оскільки саме контролер взаємодіє з HTTP-запитами.
+
+---
+
+### 2. Що таке `Dependency Injection`? Чому він кращий за new?
+
+*Відповідь:*
+
+`Dependency Injection (DI)` — це механізм, при якому залежності (наприклад, сервіси) передаються в клас автоматично через конструктор.
+
+Переваги:
+* не потрібно вручну створювати об’єкти через `new`
+* легше тестувати (можна підміняти залежності)
+* слабке зв’язування коду
+* Nest сам керує життєвим циклом сервісів
+
+---
+
+### 3. Різниця між `CreateTaskDto` та `UpdateTaskDto`?
+
+*Відповідь:*
+* `CreateTaskDto` — використовується при створенні об’єкта, містить обов’язкові поля
+* `UpdateTaskDto` — використовується при оновленні, всі поля необов’язкові
+
+Причина:
+PATCH оновлює лише частину даних, а не весь об’єкт повністю.
+
+---
+
+### 4. Що робить whitelist: true у ValidationPipe?
+
+*Відповідь:*
+
+`whitelist: true` автоматично видаляє всі поля, яких немає в DTO.
+
+Наприклад, якщо клієнт надішле:
+```json
+{ "title": "Test", "isAdmin": true }
 ```
+то поле isAdmin буде видалено.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Це захищає від:
+* зайвих даних
+* mass assignment атак
+* зміни заборонених полів
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+### 5. Що повертає сервіс, якщо задача не знайдена? Де кидається виключення?
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+*Відповідь:*
 
-## Support
+Service повертає:
+* `null` (для findOne / update)
+* `false` (для remove)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+HTTP-виключення (`NotFoundException`) кидається в Controller, оскільки він відповідає за HTTP-рівень.
