@@ -1,0 +1,138 @@
+/* Общий контейнер */
+.App {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fefefe;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  font-family: 'Arial', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Заголовок */
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Блок добавления нового todo */
+.input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.input-container input:focus {
+  border-color: #4f46e5; /* фиолетовый акцент */
+  outline: none;
+}
+
+/* Кнопка добавления */
+.input-container button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.input-container button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.input-container button:hover:not(:disabled) {
+  background-color: #3730a3;
+}
+
+/* Список todos */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  border-radius: 8px;
+}
+
+li {
+  transition: background-color 0.2s ease;
+}
+
+
+li label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+li:hover {
+  background-color: #f3f4f6;
+}
+
+/* Чекбокс */
+li input[type="checkbox"] {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+}
+
+.checkbox-cross {
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
+/* Кнопка удаления */
+li button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+li button:hover {
+  background-color: #b91c1c;
+}
+
+li button:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
+}
+
+/* Закрашенный текст для completed */
+li.completed {
+  opacity: 0.7;
+}
+
+.todo-text {
+  font-size: 16px;
+  display: block;
+  line-height: 1.4;
+  min-height: 1.4em;
+}
+
+li.completed .todo-text {
+  text-decoration: line-through;
+  color: #6b7280;
+}
