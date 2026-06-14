@@ -1,0 +1,62 @@
+/* --- Загальна структура --- */
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+  font-family: Arial, sans-serif;
+  padding: 16px;
+}
+
+/* --- Header --- */
+.header {
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.stats {
+  margin: 4px 0 0 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* --- Main: sidebar + content --- */
+.main {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* двоколонковий макет */
+  gap: 16px;
+}
+
+/* Sidebar для форми */
+.sidebar {
+  background: #f4f4f4;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* Контент (фільтри + список задач) */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Фільтри */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters label {
+  font-weight: 500;
+}
+
+.filters select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}

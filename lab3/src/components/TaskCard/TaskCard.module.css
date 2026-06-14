@@ -1,0 +1,39 @@
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardLow {
+  border-left: 6px solid #2ecc71;
+}
+
+.cardMedium {
+  border-left: 6px solid #f1c40f;
+}
+
+.cardHigh {
+  border-left: 6px solid #e74c3c;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.meta {
+  font-size: 14px;
+  color: #555;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
